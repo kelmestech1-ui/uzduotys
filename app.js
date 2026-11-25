@@ -11,6 +11,7 @@ const REPEATS = ['Ne', 'Kasdien', 'Darbo dienomis', 'Kas savaitę', 'Kas mėnes�
 const WD = ['Sk', 'Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št'];
 const WDL = ['sekmadienis', 'pirmadienis', 'antradienis', 'trečiadienis', 'ketvirtadienis', 'penktadienis', 'šeštadienis'];
 const DONE = 'Atlikta';
+const MONTHS_G = ['sausio', 'vasario', 'kovo', 'balandžio', 'gegužės', 'birželio', 'liepos', 'rugpjūčio', 'rugsėjo', 'spalio', 'lapkričio', 'gruodžio'];
 const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const STANDALONE = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 
@@ -80,7 +81,7 @@ function fmtWhen(s) { return s ? fmtDue(s.slice(0, 10)) + ' ' + s.slice(11, 16) 
 /* ---------- prisijungimas ---------- */
 function showApp() {
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
-  $('#hello').textContent = 'Labas, ' + S.me.name + '!';
+  $('#hello').textContent = 'Labas, ' + S.me.name;
   $('#people').classList.toggle('hidden', !canAssign());
   $('#msgBtn').classList.toggle('hidden', !S.me.boss);
   $('#setBtn').classList.toggle('hidden', !S.me.boss);
@@ -140,7 +141,8 @@ function apply(r, fromCache) {
   }
   if (!fromCache) store('ut_data', { tasks: S.tasks, today: S.today, clients: S.clients, inbox: S.inbox, sent: S.sent, prefs: S.prefs });
   const o = dObj(S.today);
-  $('#dateLine').textContent = WDL[o.getDay()].replace(/^./, c => c.toUpperCase()) + ', ' + S.today;
+  $('#dateLine').innerHTML = '<span class="wd">' + WDL[o.getDay()].replace(/^./, c => c.toUpperCase()) + '</span>' +
+    '<span class="dm">' + MONTHS_G[o.getMonth()] + ' ' + o.getDate() + ' d.</span>';
   if (S.tab !== 'stats') render();
   else renderPeople();
   setBadge(S.tasks.filter(t => t.to === S.me.name && t.status !== DONE && t.due && t.due <= S.today).length);
@@ -249,7 +251,8 @@ function renderPeople() {
 }
 
 function group(title, cls, arr) {
-  return '<div class="group"><div class="gtitle ' + cls + '">' + title + ' · ' + arr.length + '</div>' + arr.map(card).join('') + '</div>';
+  return '<section class="group ' + cls + '"><h3 class="gtitle">' + title + '<span class="gc">' + arr.length + '</span></h3>' +
+    '<div class="glist">' + arr.map(card).join('') + '</div></section>';
 }
 
 function empty(msg, ico) { return '<div class="empty"><div>' + ico + '</div>' + msg + '</div>'; }
@@ -273,7 +276,7 @@ function card(t) {
     '<button class="check" data-check="' + esc(t.id) + '" ' + (t.canDone ? '' : 'disabled') + '>' + (isDone ? '✓' : '') + '</button>' +
     '<div class="cbody"><div class="ctitle">' + (t.prio === 'Svarbi' ? '<span class="flag">!</span> ' : '') + esc(t.title) + '</div>' +
     (t.client ? '<div class="cclient">🏢 ' + esc(t.client) + '</div>' : '') +
-    (meta.length ? '<div class="cmeta">' + meta.join(' · ') + '</div>' : '') + '</div>' +
+    (meta.length ? '<div class="cmeta">' + meta.map(m => '<span>' + m + '</span>').join('') + '</div>' : '') + '</div>' +
     (t.phone && !isDone ? '<a class="callbtn" href="' + esc(tel(t.phone)) + '" title="Skambinti">📞</a>' : '') +
     '</div></div>';
 }
@@ -290,7 +293,7 @@ function groupCard(g) {
     '<div class="gicon">👥</div>' +
     '<div class="cbody"><div class="ctitle">' + (g.prio === 'Svarbi' ? '<span class="flag">!</span> ' : '') + esc(g.title) + '</div>' +
     (g.client ? '<div class="cclient">🏢 ' + esc(g.client) + '</div>' : '') +
-    '<div class="cmeta">' + meta.join(' · ') + '</div>' +
+    '<div class="cmeta">' + meta.map(m => '<span>' + m + '</span>').join('') + '</div>' +
     '<div class="meter"><i style="width:' + Math.round(g.doneCount / g.members.length * 100) + '%"></i></div></div></div></div>';
 }
 

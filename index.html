@@ -3,15 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#0F3B42">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Užduotys">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Pardavimų užduotys</title>
+<meta name="apple-mobile-web-app-title" content="KT CRM">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kelmės Technika CRM</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -19,9 +22,9 @@
 
 <div id="login">
   <div class="login-box">
-    <div class="logo">✓</div>
-    <h1>Pardavimų užduotys</h1>
-    <p class="muted">Įveskite savo PIN kodą</p>
+    <div class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h1>Kelmės Technika<br>CRM</h1>
+    <p class="lead">Įveskite savo PIN kodą</p>
     <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="10">
     <button id="loginBtn" class="btn primary wide">Prisijungti</button>
     <p id="loginErr" class="err"></p>
@@ -29,23 +32,25 @@
 </div>
 
 <div id="app" class="hidden">
+ <div class="band">
   <header>
-    <div><div class="hello" id="hello"></div><div class="muted small" id="dateLine"></div></div>
-    <button class="icon hidden" id="msgBtn" title="Žinutė komandai">📣</button>
-    <button class="icon hidden" id="setBtn" title="Nustatymai">⚙️</button>
-    <button class="icon" id="refreshBtn" title="Atnaujinti">⟳</button>
-    <button class="icon" id="logoutBtn" title="Atsijungti">🚪</button>
+    <div class="who"><div class="hello" id="hello"></div><div class="date" id="dateLine"></div></div>
+    <button class="icon hidden" id="msgBtn" title="Žinutė komandai"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h3l6 4V5L8 9H5a1 1 0 0 0-1 1zM18 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="icon hidden" id="setBtn" title="Nustatymai"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="icon" id="refreshBtn" title="Atnaujinti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="icon" id="logoutBtn" title="Atsijungti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </header>
   <div id="pushBar" class="pushbar hidden"></div>
   <div id="people" class="chips hidden"></div>
   <div class="tabs" id="tabs">
     <button data-tab="open" class="active">Aktyvios <span id="cntOpen"></span></button>
     <button data-tab="done">Atliktos</button>
-    <button data-tab="stats" class="hidden" id="statsTab">📊</button>
+    <button data-tab="stats" class="hidden" id="statsTab">Statistika</button>
   </div>
+ </div>
   <div id="hint" class="hint hidden">💡 Braukite užduotį į dešinę – <b>atlikta</b>, į kairę – <b>rytoj</b>. <button class="x" id="hintX">✕</button></div>
   <main id="list"><div class="empty">Kraunama…</div></main>
-  <button id="fab" class="fab" title="Nauja">+</button>
+  <button id="fab" class="fab" title="Nauja užduotis" aria-label="Nauja užduotis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
 </div>
 
 <datalist id="clientList"></datalist>

@@ -1,14 +1,24 @@
 {
-  "name": "Pardavimų užduotys",
-  "short_name": "Užduotys",
+  "name": "Kelmės Technika CRM",
+  "short_name": "KT CRM",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f4f6",
-  "theme_color": "#2563eb",
+  "background_color": "#0F3B42",
+  "theme_color": "#0F3B42",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
