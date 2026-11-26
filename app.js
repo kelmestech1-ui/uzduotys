@@ -175,7 +175,8 @@ function render() {
   const summary = canAssign() && S.tab === 'open' ? summaryCard(ts) : '';
   if (canAssign() && S.person === '*') ts = groupTasks(ts);
   const open = ts.filter(t => t.status !== DONE);
-  $('#cntOpen').textContent = open.length ? '(' + open.length + ')' : '';
+  const nowCount = open.filter(t => t.due && t.due <= S.today).length;
+  $('#cntOpen').textContent = nowCount ? '(' + nowCount + ')' : '';
   let html = '';
   if (S.tab === 'done') {
     const done = ts.filter(t => t.status === DONE).sort((a, b) => b.doneAt.localeCompare(a.doneAt));
@@ -184,12 +185,21 @@ function render() {
     const T = S.today, T1 = addD(T, 1);
     const sorted = open.slice().sort(cmp);
     const g = (title, cls, f) => { const a = sorted.filter(f); return a.length ? group(title, cls, a) : ''; };
+    // Pagrindiniame sąraše – tik pradelstos ir šiandienos; vėlesnės paslėptos po mygtuku
     html = g('Pradelsta', 'over', t => t.due && t.due < T) +
-      g('Šiandien', 'today', t => t.due === T) +
-      g('Rytoj', '', t => t.due === T1) +
-      g('Vėliau', '', t => t.due > T1) +
-      g('Be termino', '', t => !t.due);
-    if (!html) html = empty('Visos užduotys atliktos!', '🎉');
+      g('Šiandien', 'today', t => t.due === T);
+    const later = sorted.filter(t => !t.due || t.due > T);
+    if (!html) html = empty(later.length ? 'Šiandienai užduočių nebeliko!' : 'Visos užduotys atliktos!', '🎉');
+    if (later.length) {
+      const showLater = load('ut_later') === '1';
+      html += '<button class="laterbtn" data-later="1">' + (showLater ? 'Slėpti kitas užduotis' : 'Kitos užduotys (' + later.length + ')') +
+        '<span class="muted small">' + (showLater ? '' : ' – rytoj, vėliau, be termino') + '</span></button>';
+      if (showLater) {
+        html += g('Rytoj', '', t => t.due === T1) +
+          g('Vėliau', '', t => t.due > T1) +
+          g('Be termino', '', t => !t.due);
+      }
+    }
     html = inboxHtml() + summary + html;
   }
   const seg = '<div class="seg workseg"><button data-tab="open" class="' + (S.tab === 'open' ? 'on' : '') + '">Aktyvios</button>' +
@@ -919,6 +929,7 @@ $('#list').addEventListener('click', e => {
   if (Date.now() - S.swipedAt < 400) return;
   if (e.target.closest('a')) return; // skambinti
   if (calClick(e)) return;
+  if (e.target.closest('[data-later]')) { store('ut_later', load('ut_later') === '1' ? '0' : '1'); render(); return; }
   if (clientsClick(e)) return;
   const tb = e.target.closest('[data-tab]');
   if (tb) { S.tab = tb.dataset.tab; render(); return; }

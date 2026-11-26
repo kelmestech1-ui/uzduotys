@@ -219,6 +219,9 @@ details.sent .sr.grn{color:var(--mint)}
 .seg.workseg button{flex:1;padding:8px;font-size:14px}
 .seg.workseg button.on{background:var(--petrol);color:#fff}
 
+.laterbtn{display:block;width:calc(100% - 24px);margin:4px 12px 18px;border:1.5px dashed #C9D4D3;background:transparent;border-radius:var(--r-md);padding:12px;font-weight:650;color:var(--petrol);text-align:center}
+.laterbtn .small{font-weight:500}
+
 /* ---------- klientai ---------- */
 .clients{margin:0 12px}
 .csearch{display:flex;gap:8px;position:relative;z-index:1}
