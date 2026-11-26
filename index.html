@@ -43,9 +43,10 @@
   <div id="pushBar" class="pushbar hidden"></div>
   <div id="people" class="chips hidden"></div>
   <div class="tabs" id="tabs">
-    <button data-tab="open" class="active">Aktyvios <span id="cntOpen"></span></button>
-    <button data-tab="done">Atliktos</button>
-    <button data-tab="stats" class="hidden" id="statsTab">Statistika</button>
+    <button data-tab="open" class="active">Darbai <span id="cntOpen"></span></button>
+    <button data-tab="cal">Dienotvarkė</button>
+    <button data-tab="clients">Klientai</button>
+    <button data-tab="stats" class="hidden" id="statsTab" title="Statistika" aria-label="Statistika"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
   </div>
  </div>
   <div id="hint" class="hint hidden">💡 Braukite užduotį į dešinę – <b>atlikta</b>, į kairę – <b>rytoj</b>. <button class="x" id="hintX">✕</button></div>
@@ -61,6 +62,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
 <script src="quick.js"></script>
+<script src="cal.js"></script>
+<script src="clients.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -135,11 +135,12 @@ function apply(r, fromCache) {
   if (r.inbox) S.inbox = r.inbox;
   if (r.sent) S.sent = r.sent;
   if (r.prefs) S.prefs = r.prefs;
+  if (r.templates) S.templates = r.templates;
   if (r.clients) {
     S.clients = r.clients;
     $('#clientList').innerHTML = S.clients.map(c => '<option value="' + esc(c.n) + '"></option>').join('');
   }
-  if (!fromCache) store('ut_data', { tasks: S.tasks, today: S.today, clients: S.clients, inbox: S.inbox, sent: S.sent, prefs: S.prefs });
+  if (!fromCache) store('ut_data', { tasks: S.tasks, today: S.today, clients: S.clients, inbox: S.inbox, sent: S.sent, prefs: S.prefs, templates: S.templates });
   const o = dObj(S.today);
   $('#dateLine').innerHTML = '<span class="wd">' + WDL[o.getDay()].replace(/^./, c => c.toUpperCase()) + '</span>' +
     '<span class="dm">' + MONTHS_G[o.getMonth()] + ' ' + o.getDate() + ' d.</span>';
@@ -165,8 +166,10 @@ function cmp(a, b) {
 
 function render() {
   renderPeople();
-  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === S.tab));
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === S.tab || (b.dataset.tab === 'open' && S.tab === 'done')));
   if (S.tab === 'stats') { loadStats(S.statsPeriod); return; }
+  if (S.tab === 'cal') { renderCal(); return; }
+  if (S.tab === 'clients') { renderClients(); return; }
   let ts = S.tasks;
   if (canAssign() && S.person !== '*') ts = ts.filter(t => t.to === S.person);
   const summary = canAssign() && S.tab === 'open' ? summaryCard(ts) : '';
@@ -189,7 +192,15 @@ function render() {
     if (!html) html = empty('Visos užduotys atliktos!', '🎉');
     html = inboxHtml() + summary + html;
   }
-  $('#list').innerHTML = html;
+  const seg = '<div class="seg workseg"><button data-tab="open" class="' + (S.tab === 'open' ? 'on' : '') + '">Aktyvios</button>' +
+    '<button data-tab="done" class="' + (S.tab === 'done' ? 'on' : '') + '">Atliktos</button></div>';
+  $('#list').innerHTML = (S.tab === 'open' ? inboxHtmlOnce(html) : seg + html);
+}
+
+/* Aktyvių sąraše perjungiklis eina po žinučių ir suvestinės */
+function inboxHtmlOnce(html) {
+  const seg = '<div class="seg workseg"><button data-tab="open" class="on">Aktyvios</button><button data-tab="done">Atliktos</button></div>';
+  return seg + html;
 }
 
 /* Vadovo žinutės, kurių vadybininkas dar nepatvirtino */
@@ -410,7 +421,7 @@ function openDetail(id) {
   if (canAssign()) info.push(['Kam', t.to === S.me.name ? 'Man' : t.to]);
   if (t.by !== t.to) info.push(['Paskyrė', t.by]);
   info.push(['Terminas', t.due ? fmtDue(t.due) + ' (' + t.due + ')' : 'be termino']);
-  if (t.remind) info.push(['Priminimas', fmtWhen(t.remind)]);
+  if (t.remind) info.push(['Laikas', fmtWhen(t.remind) + (t.dur ? '–' + m2hm(tEndM(t)) : '')]);
   if (t.repeat !== 'Ne') info.push(['Kartojasi', t.repeat]);
   if (t.type === 'Užduotis' && t.by !== t.to) info.push(['Matė', t.seen ? fmtWhen(t.seen) : 'dar neatidarė']);
   info.push(['Sukurta', fmtWhen(t.created)]);
@@ -426,6 +437,8 @@ function openDetail(id) {
       '</div></div>';
   }
   if (t.desc) h += '<p class="desc">' + esc(t.desc) + '</p>';
+  const gc = !isDone && gcalUrl(t);
+  if (gc) h += '<div class="actions"><a class="btn soft sm" href="' + esc(gc) + '" target="_blank" rel="noopener">Įkelti į Google kalendorių</a></div>';
   h += '<dl class="info">' + info.map(x => '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>').join('') + '</dl>';
   if (t.canDone) {
     h += '<div class="actions">' +
@@ -485,6 +498,7 @@ async function detailAction(t, act, btn) {
 /* ---------- nauja / redaguoti ---------- */
 function openForm(t, preset) {
   const isNew = !t;
+  S.editId = t ? t.id : null;
   const v = t ? Object.assign({}, t) : Object.assign({
     title: '', desc: '', due: S.today, remind: '', prio: 'Įprasta', repeat: 'Ne', client: '', phone: '', email: '',
     to: canAssign() && S.person !== '*' ? S.person : S.me.name
@@ -492,6 +506,7 @@ function openForm(t, preset) {
   const head = isNew ? (canAssign() ? 'Nauja užduotis' : 'Naujas priminimas') : 'Redaguoti';
   let h = '<div class="sh-head"><h2>' + head + '</h2><button class="icon" data-close>✕</button></div>';
   if (isNew) {
+    h += templatesRow();
     h += '<input type="text" id="fTitle" class="smart" maxlength="300" autocomplete="off" value="' + esc(v.title) + '" placeholder="Ką reikia padaryti?">' +
       '<div class="tip">Rašykite paprastai: <b>rytoj</b>, <b>penktadienį</b>, <b>12.05</b>, <b>10:00</b>, <b>!</b> – svarbi, <b>#klientas</b>' +
       (canAssign() ? ', <b>@vardas</b>' : '') + ', <b>kas savaitę</b>. 🎤 Galite diktuoti klaviatūros mikrofonu.</div>' +
@@ -516,6 +531,10 @@ function openForm(t, preset) {
   h += '<label>Priminti (nebūtina)</label><input type="datetime-local" id="fRemind" data-f value="' + esc((v.remind || '').replace(' ', 'T')) + '">' +
     '<div class="qrow" data-q="rem"><button class="q" data-v="09:00">9:00</button><button class="q" data-v="12:00">12:00</button>' +
     '<button class="q" data-v="15:00">15:00</button><button class="q" data-v="">Nepriminti</button></div>';
+  const dur0 = v.dur || 30;
+  h += '<label>Trukmė <span class="muted small">(kalendoriui)</span></label><div class="qrow" data-q="dur">' +
+    DURS.map(x => '<button class="q' + (x[0] === dur0 ? ' on' : '') + '" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
+    '<input type="hidden" id="fDur" value="' + dur0 + '"><div id="busy" class="busy"></div>';
   h += '<label>Kartoti</label><select id="fRepeat" data-f>' + REPEATS.map(r => '<option' + (r === v.repeat ? ' selected' : '') + '>' + r + '</option>').join('') + '</select>';
   h += '<label class="toggle"><input type="checkbox" id="fPrio" data-f' + (v.prio === 'Svarbi' ? ' checked' : '') + '> Svarbi užduotis</label>';
   h += '<label>Pastabos</label><textarea id="fDesc" placeholder="Papildoma informacija (nebūtina)">' + esc(v.desc) + '</textarea>';
@@ -528,6 +547,15 @@ function openForm(t, preset) {
     el.addEventListener('change', () => { el.dataset.touched = '1'; });
   });
   $('#fClient').addEventListener('change', fillClient);
+  ['#fDue', '#fRemind'].forEach(id => { $(id).addEventListener('change', renderBusy); $(id).addEventListener('input', renderBusy); });
+  if (preset) {
+    [['due', '#fDue'], ['remind', '#fRemind'], ['client', '#fClient'], ['phone', '#fPhone'], ['email', '#fEmail']].forEach(k => {
+      if (preset[k[0]]) $(k[1]).dataset.touched = '1';
+    });
+    if (preset.to && $('#fTo')) $('#fTo').dataset.touched = '1';
+    if (preset.prio) $('#fPrio').dataset.touched = '1';
+  }
+  renderBusy();
   if (isNew) {
     S.parsed = null;
     $('#fTitle').addEventListener('input', onSmartInput);
@@ -569,6 +597,7 @@ function onSmartInput() {
   if (q.to) pv.push(q.to === '*' ? '👥 visiems' : '👤 ' + q.to);
   if (q.repeat) pv.push('🔁 ' + q.repeat.toLowerCase());
   $('#preview').innerHTML = pv.map(x => '<span class="pv">' + esc(x) + '</span>').join('');
+  renderBusy();
 }
 
 function toOthers() { return S.users.filter(u => u !== S.me.name); }
@@ -603,6 +632,19 @@ function quick(kind, val, btn) {
     } else btn.classList.toggle('on');
     syncAllChip();
     box.dataset.touched = '1';
+    renderBusy();
+    return;
+  }
+  if (kind === 'dur') {
+    btn.parentElement.querySelectorAll('.q').forEach(b => b.classList.toggle('on', b === btn));
+    $('#fDur').value = val;
+    renderBusy();
+    return;
+  }
+  if (kind === 'free') {
+    $('#fRemind').value = ($('#fDue').value || S.today) + 'T' + val;
+    $('#fRemind').dataset.touched = '1';
+    renderBusy();
     return;
   }
   if (kind === 'due') {
@@ -610,11 +652,14 @@ function quick(kind, val, btn) {
     if (val === 'mon') { const wd = dObj(S.today).getDay(); d = addD(S.today, ((8 - wd) % 7) || 7); }
     else if (val !== '') d = addD(S.today, Number(val));
     $('#fDue').value = d; $('#fDue').dataset.touched = '1';
+    renderBusy();
   } else if (kind === 'rem') {
     $('#fRemind').value = val ? ($('#fDue').value || S.today) + 'T' + val : '';
     $('#fRemind').dataset.touched = '1';
+    renderBusy();
   } else {
     btn.parentElement.querySelectorAll('.q').forEach(b => b.classList.toggle('on', b === btn));
+    if (kind === 'stage') $('#dStage').value = val;
   }
 }
 
@@ -633,7 +678,8 @@ async function formAction(t, act, btn) {
     due: $('#fDue').value,
     remind: $('#fRemind').value,
     prio: $('#fPrio').checked ? 'Svarbi' : 'Įprasta',
-    repeat: $('#fRepeat').value
+    repeat: $('#fRepeat').value,
+    dur: $('#fRemind').value ? (Number($('#fDur').value) || 30) : 0
   };
   if (!p.title) { toast('Įrašykite, ką reikia padaryti'); $('#fTitle').focus(); return; }
   if (p.repeat !== 'Ne' && !p.due) { toast('Pasikartojančiai užduočiai reikia termino'); return; }
@@ -705,6 +751,7 @@ async function loadStats(period) {
         '<div><div class="v">' + x.open + '</div><div class="l">aktyvių</div></div></div>' +
         (x.pct != null ? '<div class="meter"><i style="width:' + x.pct + '%"></i></div>' : '') + '</div>';
     });
+    h += dealStatsHtml(r.deals);
     $('#list').innerHTML = h;
   } catch (e) {
     if (S.tab === 'stats') $('#list').innerHTML = statsHeader() + empty(esc(errMsg(e)), '⚠️');
@@ -865,11 +912,16 @@ $('#people').addEventListener('click', e => {
 });
 $('#tabs').addEventListener('click', e => {
   const b = e.target.closest('[data-tab]'); if (!b) return;
+  if (b.dataset.tab === 'clients') S.clientRows = null;
   S.tab = b.dataset.tab; render();
 });
 $('#list').addEventListener('click', e => {
   if (Date.now() - S.swipedAt < 400) return;
   if (e.target.closest('a')) return; // skambinti
+  if (calClick(e)) return;
+  if (clientsClick(e)) return;
+  const tb = e.target.closest('[data-tab]');
+  if (tb) { S.tab = tb.dataset.tab; render(); return; }
   const per = e.target.closest('[data-period]');
   if (per) { loadStats(per.dataset.period); return; }
   const sv = e.target.closest('[data-sview]');
@@ -898,8 +950,10 @@ $('#list').addEventListener('click', e => {
 });
 $('#sheet').addEventListener('click', e => {
   if (e.target.classList.contains('sheet-bg') || e.target.closest('[data-close]')) return closeSheet();
+  const tp = e.target.closest('[data-tpl]');
+  if (tp) { applyTemplate(Number(tp.dataset.tpl)); return; }
   const q = e.target.closest('.q');
-  if (q) {
+  if (q && q.parentElement.dataset.q) {
     const kind = q.parentElement.dataset.q;
     if (kind === 'nsWhat') { $('#nTitle').value = q.dataset.v; return; }
     quick(kind, q.dataset.v, q); return;

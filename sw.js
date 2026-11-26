@@ -5,8 +5,8 @@ importScripts(
   'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js'
 );
 
-const CACHE = 'uzduotys-v6';
-const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'quick.js', 'config.js', 'manifest.webmanifest',
+const CACHE = 'uzduotys-v8';
+const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'quick.js', 'cal.js', 'clients.js', 'config.js', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 // Pranešimai: Firebase pats parodo pranešimą, o paspaudus atidaro programėlę
