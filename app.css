@@ -223,7 +223,10 @@ details.sent .sr.grn{color:var(--mint)}
 .clients{margin:0 12px}
 .csearch{display:flex;gap:8px;position:relative;z-index:1}
 .csearch input{flex:1;box-shadow:0 10px 30px -20px rgba(15,59,66,.4)}
-.cchips{padding:10px 0 12px!important}
+.cchips{padding:10px 0 6px!important}
+.cby{display:flex;align-items:center;gap:10px;margin:0 2px 12px}
+.cby label{margin:0;flex:none}
+.cby select{flex:1;min-height:40px;padding:7px 12px}
 .crow{display:flex;gap:12px;align-items:center;padding:14px 16px;cursor:pointer}
 .crow + .crow{border-top:1px solid var(--line)}
 .crow .cmeta{flex-direction:column;gap:2px}

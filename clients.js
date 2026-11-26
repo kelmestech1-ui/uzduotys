@@ -25,9 +25,19 @@ function renderClients() {
     '<div class="csearch"><input type="text" id="cSearch" placeholder="Ieškoti kliento…" autocomplete="off" value="' + esc(S.cQuery || '') + '">' +
     '<button class="btn primary sm" data-cnew="1">+ Naujas</button></div>' +
     '<div class="chips cchips">' + chip('all', 'Visi') + chip('nonext', 'Be kito žingsnio') + chip('deals', 'Su sandoriais') + '</div>' +
-    '<div id="cList"></div></div>';
+    creatorSelect() + '<div id="cList"></div></div>';
   $('#cSearch').addEventListener('input', e => { S.cQuery = e.target.value; renderClientList(); });
+  $('#cBy').addEventListener('change', e => { S.cBy = e.target.value; renderClientList(); });
   renderClientList();
+}
+
+/* Filtras „Vadybininkas“: pirmiausia aš, tada kiti pagal abėcėlę */
+function creatorSelect() {
+  const names = Array.from(new Set(S.clientRows.map(c => c.by).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'lt'));
+  const others = names.filter(n => n !== S.me.name);
+  const opt = (v, l) => '<option value="' + esc(v) + '"' + ((S.cBy || '') === v ? ' selected' : '') + '>' + esc(l) + '</option>';
+  return '<div class="cby"><label for="cBy">Vadybininkas</label><select id="cBy">' + opt('', 'Visi') + opt(S.me.name, 'Aš (' + S.me.name + ')') +
+    others.map(n => opt(n, n)).join('') + '</select></div>';
 }
 
 function renderClientList() {
@@ -35,6 +45,7 @@ function renderClientList() {
   const q = foldLt((S.cQuery || '').trim());
   const f = S.cFilter || 'all';
   let rows = S.clientRows.filter(c => !q || foldLt(c.n).includes(q) || (c.p || '').replace(/\s/g, '').includes(q.replace(/\s/g, '')));
+  if (S.cBy) rows = rows.filter(c => c.by === S.cBy);
   if (f === 'nonext') rows = rows.filter(c => !c.next).sort((a, b) => (b.ago == null ? -1 : b.ago) - (a.ago == null ? -1 : a.ago));
   else if (f === 'deals') rows = rows.filter(c => c.dealsOpen).sort((a, b) => b.dealsSum - a.dealsSum);
   else rows = rows.slice().sort((a, b) => a.n.localeCompare(b.n, 'lt'));
@@ -47,8 +58,9 @@ function renderClientList() {
       ? '<span class="cnext">→ ' + esc(c.next.due ? fmtDue(c.next.due) : 'be termino') + ': ' + esc(c.next.title) + '</span>'
       : '<span class="cnone">Kitas žingsnis nesuplanuotas</span>';
     const last = c.last ? '<span>Paskutinis kontaktas ' + agoTxt(c.ago) + (c.who ? ', ' + esc(c.who) : '') + '</span>' : '';
+    const by = c.by && !S.cBy ? '<span>Vadybininkas: ' + esc(c.by === S.me.name ? 'jūs' : c.by) + '</span>' : '';
     return '<div class="crow" data-client="' + esc(c.n) + '"><div class="cbody"><div class="ctitle">' + esc(c.n) + '</div>' +
-      '<div class="cmeta">' + next + last + (c.dealsOpen ? '<span class="cdeal">' + c.dealsOpen + ' sand. · ' + fmtEur(c.dealsSum) + '</span>' : '') + '</div></div>' +
+      '<div class="cmeta">' + next + last + by + (c.dealsOpen ? '<span class="cdeal">' + c.dealsOpen + ' sand. · ' + fmtEur(c.dealsSum) + '</span>' : '') + '</div></div>' +
       (c.p ? '<a class="callbtn" href="' + esc(tel(c.p)) + '" title="Skambinti">📞</a>' : '') + '</div>';
   }).join('') + '</div>' + (rows.length > 200 ? '<p class="caltip">Rodoma 200 iš ' + rows.length + ' – patikslinkite paiešką.</p>' : '');
 }

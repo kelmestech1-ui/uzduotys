@@ -5,7 +5,7 @@ importScripts(
   'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js'
 );
 
-const CACHE = 'uzduotys-v8';
+const CACHE = 'uzduotys-v10';
 const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'quick.js', 'cal.js', 'clients.js', 'config.js', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
