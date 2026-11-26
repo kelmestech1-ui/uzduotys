@@ -667,9 +667,18 @@ function quick(kind, val, btn) {
     $('#fRemind').value = val ? ($('#fDue').value || S.today) + 'T' + val : '';
     $('#fRemind').dataset.touched = '1';
     renderBusy();
+  } else if (kind === 'dvalid') {
+    $('#dValid').value = addD(S.today, Number(val));
+  } else if (btn.parentElement.dataset.multi) {
+    btn.classList.toggle('on');
   } else {
-    btn.parentElement.querySelectorAll('.q').forEach(b => b.classList.toggle('on', b === btn));
-    if (kind === 'stage') $('#dStage').value = val;
+    const was = btn.classList.contains('on');
+    btn.parentElement.querySelectorAll('.q').forEach(b => b.classList.toggle('on', b === btn && !(was && /^c(type|src)$/.test(kind))));
+    if (kind === 'stage') {
+      $('#dStage').value = val;
+      $('#dReasonBox').classList.toggle('hidden', val !== 'Pralaimėta');
+      $('#dValidBox').classList.toggle('hidden', !(val === 'Pasiūlymas' || val === 'Derybos'));
+    }
   }
 }
 

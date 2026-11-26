@@ -227,7 +227,7 @@ details.sent .sr.grn{color:var(--mint)}
 .csearch{display:flex;gap:8px;position:relative;z-index:1}
 .csearch input{flex:1;box-shadow:0 10px 30px -20px rgba(15,59,66,.4)}
 .cchips{padding:10px 0 6px!important}
-.cby{display:flex;align-items:center;gap:10px;margin:0 2px 12px}
+.cby{display:flex;align-items:center;gap:8px;margin:0 0 12px}
 .cby label{margin:0;flex:none}
 .cby select{flex:1;min-height:40px;padding:7px 12px}
 .crow{display:flex;gap:12px;align-items:center;padding:14px 16px;cursor:pointer}
@@ -266,6 +266,22 @@ details.sent .sr.grn{color:var(--mint)}
 .pipe{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
 .pipe b{font-stretch:75%;font-size:17px;min-width:90px;text-align:right}
 .pipe .pn{font-weight:600}
+.pipe .stage{justify-self:start}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:#E6EEED;color:var(--muted);margin-left:6px;vertical-align:2px}
+.tag.tr{background:#E0EEF7;color:#235D82}.tag.tw{background:#EDE5F7;color:#5B3B8C}.tag.tdue{background:var(--amber-soft);color:#8A5A0B}
+.ctags{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px -6px}
+.cco{font-size:13px;color:var(--ink);margin-top:6px;line-height:1.5}
+.cco a{color:var(--petrol-3);text-decoration:none;font-weight:600}
+.ctrow-v{display:flex;gap:8px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line)}
+.ctrow{position:relative;background:#F5FAFA;border-radius:var(--r-sm);padding:10px 36px 2px 10px;margin-bottom:8px}
+.ctrow .row2{margin-bottom:8px}
+.ctrow input{min-height:40px;padding:8px 10px}
+.ck-x{position:absolute;right:6px;top:8px}
+.rhythm{background:#F5FAFA;border-radius:var(--r-md);padding:12px 14px;font-size:14px;line-height:1.6}
+.rhythm.due{background:var(--amber-soft);color:#6B4307}
+.cmeta .late{color:var(--red);font-weight:650}
+.cby select{min-width:0}
 
 /* ---------- dienotvarkė ---------- */
 .cal{margin:0 12px;background:var(--sheet);border-radius:var(--r-lg);padding:14px 12px 10px;box-shadow:0 10px 30px -20px rgba(15,59,66,.4)}
